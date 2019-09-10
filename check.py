@@ -32,4 +32,14 @@ def check_environment():
 
 
 if __name__ == '__main__':
+    """
+    $ python3 check.py
+
+    tensorflow: 1.14.0
+    sklearn: 0.21.3
+    numpy: 1.17.0
+    tqdm: 4.33.0
+    python: 3
+
+    """
     check_environment()
