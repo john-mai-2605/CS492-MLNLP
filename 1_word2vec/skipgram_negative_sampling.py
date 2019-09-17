@@ -6,20 +6,22 @@ import queue
 import pdb
 import os
 from tqdm import trange, tqdm
+import sys
 
 
 def _download_dataset(file_path):
-    import sys
     assert sys.version_info.major == 3, "Use Python3"
 
+    import ssl
     import urllib.request
     url = "https://raw.githubusercontent.com/dongkwan-kim/small_dataset/master/korea.txt"
 
-    import os
     dir_path = os.path.dirname(file_path)
     if not os.path.isfile(file_path):
         os.makedirs(dir_path, exist_ok=True)
-        urllib.request.urlretrieve(url, file_path)
+        ctx = ssl._create_unverified_context()
+        with urllib.request.urlopen(url, context=ctx) as u, open(file_path, 'wb') as f:
+            f.write(u.read())
         print("Download: {}".format(file_path))
     else:
         print("Already exist: {}".format(file_path))
@@ -155,16 +157,23 @@ class SkipGram:
         :param W: [vocab_dim, embedding_dim] (np.ndarray)  : W matrix
         :param W_prime: [vocab_dim, embedding_dim] (np.ndarray) : W_prime matrix
         :return: (float)
+
+        You may wonder what this function should output.
+        This function should return the input to the sigmoid function.
         """
         raise NotImplementedError
 
     def backward(self, forwards, label):
         """
         Calculate gradients from a Negative Sampling objective function!
-        I give you some codes which handles saturation problems.
+        I give you some codes which handle saturation problems.
         :param forwards: (float) : the result from the forward
-        :param label: (int) : whether the word is positive or negative
+        :param label: (int) : whether the word is positive (1) or negative (0).
         :return: (float) : gradient
+
+        If you finish the derivation of 3 equations in Exercise 1-1, you will find a pattern
+        or a similarity among them. You can get a result in a form of [scalar]x[vector].
+        You should return only scalar term without vector term.
         """
         bound = 6
         if forwards > bound:
@@ -173,7 +182,7 @@ class SkipGram:
             gradient = (label - 0)
         else:
             raise NotImplementedError
-        raise NotImplementedError
+        return gradient
 
     def optimize(self, learning_rate, gradients, W, W_prime):
         """
@@ -183,7 +192,10 @@ class SkipGram:
         :param gradients: (list) : list of (gradient (float), center index (int), context index (int)) triples
         :param W: [vocab_dim, embedding_dim] (np.ndarray) : W matrix
         :param W_prime: [vocab_dim, embedding_dim] (np.ndarray) : W_prime matrix
-        There's no return
+
+        In a backward function, we only return a scalar term, but the original gradient form is [scalar]x[vector].
+        You should update weights by adding or subtracting learning_rate * gradient value.
+        There's no return value.
         """
         raise NotImplementedError
 
@@ -191,12 +203,16 @@ class SkipGram:
         """
         Implement subsampling!
         Input sentence is a naive string!
-        You should do some works to split a sentence into a array of words
         :param sample_bound: (float): scale something check README.md!
         :param sentence: (string)
         :return ret, w_cnt
         - ret: [word_num] (list) : a subsampled sentence
         - w_cnt: (int) :number of words in a subsampled sentence
+
+        You should split a sentence into a list of words.
+        You have to utilize self.vocab when you calculate the frequency (f) of each word. Please see Vocabulary class.
+        Second argument, sample_bound, specifies threshold (t) represented in Exercise 1-2.
+        When you generate a random number, you should not use built-in random.random() but numpy.random.random()
         """
         raise NotImplementedError
 
