@@ -219,7 +219,7 @@ class SkipGram:
     def train(self, input_file_name, output_file_name,
               total_epoch, learning_rate, min_count, max_count, window_size, num_negative, sample_bound,
               debug):
-        np.random.seed(6)
+        np.random.seed(0)
 
         if debug:
             pdb.set_trace()
@@ -298,7 +298,7 @@ if __name__ == '__main__':
     parser.add_argument("--embedding-dim", type=int, default=100)
     parser.add_argument("--input-file-name", type=str, default="../data/korea.txt")
     parser.add_argument("--output-file-name", type=str, default="./embedding_results.txt")
-    parser.add_argument("--total-epoch", type=int, default=200, help="Number of epochs to train")
+    parser.add_argument("--total-epoch", type=int, default=300, help="Number of epochs to train")
     parser.add_argument("--learning-rate", type=float, default=0.025)
     parser.add_argument("--min-count", type=int, default=7, help="Take words that appear more than min_count")
     parser.add_argument("--max-count", type=int, default=100000, help="Take words that appear less than max_count")
