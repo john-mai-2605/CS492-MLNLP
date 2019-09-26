@@ -7,6 +7,7 @@ import pdb
 import os
 from tqdm import trange, tqdm
 import sys
+from copy import deepcopy
 
 
 def _download_dataset(file_path):
@@ -198,13 +199,15 @@ class SkipGram:
         You should update weights by adding or subtracting learnig_rate*gradient value.
         There's no return
         """
-        center_id = None
-        center_grad_sum = np.zeros(self.embed_dim)
+        W_prime_original = deepcopy(W_prime)
+
+        # Update W_prime with W and grad.
         for grad, center_i, context_i in gradients:
-            center_id = center_i
-            center_grad_sum += grad * np.array(W_prime[context_i])
             W_prime[context_i] += learning_rate * grad * np.array(W[center_i])
-        W[center_id] += center_grad_sum
+
+        # Update W with W_prime_original and grad.
+        for grad, center_i, context_i in gradients:
+            W[center_i] += learning_rate * grad * np.array(W_prime_original[context_i])
 
     def subsampling(self, sample_bound, sentence):
         """
@@ -213,35 +216,31 @@ class SkipGram:
         You should do some works to split a sentence into a array of words
         :param sample_bound: (float): scale something check README.md!
         :param sentence: (string) 
-        :return ret, w_cnt
-        - ret: [word_num] (list) : a subsampled sentence
-        - w_cnt: (int) :number of words in a subsampled sentence
+        :return sampled_word_indices
+        - sampled_word_indices: (List[int]) : indices of subsampled words 
 
         You should split a sentence into a list of words.
         You have to utilize self.vocab when you calculate the frequency (f) of each word. Please see Vocabulary class.
         Second argument, sample_bound, specifies threshold (t) represented in Exercise 1-2.
         When you generate a random number, you should not use built-in random.random() but numpy.random.random()
         """
-        w_cnt = 0
-        ret = []
-        line = sentence.strip().split(' ')
-        for word in line:
+        sampled_word_indices = []
+        for word in sentence.strip().split(' '):
             if self.vocab.word2count.get(word) is None:
                 continue
-            if sample_bound > 0:
-                ran = (np.sqrt(self.vocab.word2count[word] / (sample_bound * self.vocab.total_words)) + 1) \
+            else:
+                prob_to_drop = (np.sqrt(self.vocab.word2count[word] / (sample_bound * self.vocab.total_words)) + 1) \
                       * (sample_bound * self.vocab.total_words) / self.vocab.word2count[word]
-                if ran < np.random.random():
+                if prob_to_drop < np.random.random():
                     continue
-            ret.append(self.vocab.word2index[word])
-            w_cnt += 1
-
-        return ret, w_cnt
+                else:
+                    sampled_word_indices.append(self.vocab.word2index[word])
+        return sampled_word_indices
 
     def train(self, input_file_name, output_file_name,
               total_epoch, learning_rate, min_count, max_count, window_size, num_negative, sample_bound,
               debug):
-        np.random.seed(6)
+        np.random.seed(0)
 
         if debug:
             pdb.set_trace()
@@ -265,14 +264,11 @@ class SkipGram:
         self.W = np.random.uniform(low, high, (self.vocab.num_words, self.embed_dim))
         self.W_prime = np.zeros((self.vocab.num_words, self.embed_dim))
 
-        w_count = 0
-
         print("\nRunning...")
         for _ in trange(total_epoch):
             for sentence in self.sentences:
                 sentence = preprocess(sentence)
-                line, w_cnt = self.subsampling(sample_bound, sentence)
-                w_count += w_cnt
+                line = self.subsampling(sample_bound, sentence)
 
                 line_pos = 0
 
@@ -320,7 +316,7 @@ if __name__ == '__main__':
     parser.add_argument("--embedding-dim", type=int, default=100)
     parser.add_argument("--input-file-name", type=str, default="../data/korea.txt")
     parser.add_argument("--output-file-name", type=str, default="./embedding_results.txt")
-    parser.add_argument("--total-epoch", type=int, default=200, help="Number of epochs to train")
+    parser.add_argument("--total-epoch", type=int, default=300, help="Number of epochs to train")
     parser.add_argument("--learning-rate", type=float, default=0.025)
     parser.add_argument("--min-count", type=int, default=7, help="Take words that appear more than min_count")
     parser.add_argument("--max-count", type=int, default=100000, help="Take words that appear less than max_count")
