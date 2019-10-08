@@ -109,6 +109,10 @@ class MyNaiveBayes:
             - class_to_num_sentences[c]: number of sentences the class of which is 'c'.
             - class_and_word_to_counts[c, w]: number of the word 'w' appeared in sentences of class 'c'.
 
+        e.g., if bows are [[42, 2, 0], [2, 0, 1]] and labels are [0, 1],
+            class_to_num_sentences[0] will be number of the sentences the class of which is 0, i.e., 1.
+            class_and_word_to_counts[0, 0] will be number of the word 0 appeared in sentences of class 0, i.e., 42.
+
         And get log_prior and log_likelihood with these.
 
         :param bows: ndarray, the shape of which is (num_batches, num_vocab)
@@ -125,6 +129,9 @@ class MyNaiveBayes:
     def get_prior(self):
         """Get prior, P(c)
 
+        e.g., if there are 48 negative (0) labels and 52 positive (1) labels,
+        P[0] = 48 / 100 = 0.48.
+
         :return ndarray P, the shape of which is (num_classes,)
             where P[c] is the prior of class c.
         """
@@ -132,6 +139,10 @@ class MyNaiveBayes:
 
     def get_likelihood_with_smoothing(self):
         """Get likelihood, P(w|c).
+
+        i.e., p(w|c) = [# of the word 'w' appeared in the sentences the class of which is 'c']
+                        / [# of the total tokens in the sentences the class of which is 'c']
+        Note that this example did not apply smoothing.
 
         :return ndarray P, the shape of which is (num_classes, num_vocab)
             where P[c, w] is the likelihood of word w and given class c.
@@ -148,6 +159,14 @@ class MyNaiveBayes:
         - log(.) is a monotonically increasing function, so if a < b, then log a < log b. This property
         makes comparing log-probabilities be equivalent to comparing probabilities (e.g., argmax).
         - We can easily transform a product of numbers to a sum of log-numbers.
+
+        i.e., log_posterior of c_k where (w_1, ..., w_n) are given
+            = log p(c_k|w_1, ..., w_n)
+            = log p(c_k) \prod_{i=1}^{n} p(w_i|c_k)
+            = log p(c_k) + log \prod_{i=1}^{n} p(w_i|c_k)
+            = log p(c_k) + \sum_{i=1}^{n} log p(w_i|c_k)
+            = log_prior + \sum_{i=1}^{n} log_likelihood[c_k, w_i]
+        Note that 'n' is not self.num_vocab, it is the number of total tokens in the sentence.
 
         :param bows: ndarray, the shape of which is (num_batches, num_vocab)
         :return ndarray L, the shape of which is (num_batches,)
