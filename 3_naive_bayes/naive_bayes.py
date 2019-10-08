@@ -165,7 +165,7 @@ class MyNaiveBayes:
             = log p(c_k) \prod_{i=1}^{n} p(w_i|c_k)
             = log p(c_k) + log \prod_{i=1}^{n} p(w_i|c_k)
             = log p(c_k) + \sum_{i=1}^{n} log p(w_i|c_k)
-            = log_prior + \sum_{i=1}^{n} log_likelihood[c_k, w_i]
+            = log_prior[c_k] + \sum_{i=1}^{n} log_likelihood[c_k, w_i]
         Note that 'n' is not self.num_vocab, it is the number of total tokens in the sentence.
 
         :param bows: ndarray, the shape of which is (num_batches, num_vocab)
