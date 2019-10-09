@@ -119,7 +119,11 @@ class MyNaiveBayes:
         :param labels: ndarray, the shape of which is (num_batches,)
         """
         # Compute self.class_to_num_sentences and self.class_and_word_to_counts
-        raise NotImplementedError
+        for c in range(self.num_classes):
+            self.class_to_num_sentences[c] = np.sum(labels == c)
+
+        for bow, label in tqdm(zip(bows, labels), total=len(bows)):
+            self.class_and_word_to_counts[label] += bow
 
         # Get log_prior and log_likelihood with these. (Do not modify below three lines.)
         self.log_prior = np.log(self.get_prior())
@@ -135,7 +139,7 @@ class MyNaiveBayes:
         :return ndarray P, the shape of which is (num_classes,)
             where P[c] is the prior of class c.
         """
-        raise NotImplementedError
+        return self.class_to_num_sentences / np.sum(self.class_to_num_sentences)
 
     def get_likelihood_with_smoothing(self):
         """Get likelihood, P(w|c).
@@ -147,7 +151,12 @@ class MyNaiveBayes:
         :return ndarray P, the shape of which is (num_classes, num_vocab)
             where P[c, w] is the likelihood of word w and given class c.
         """
-        raise NotImplementedError
+        likelihood_list = []
+        for c in range(self.num_classes):
+            likelihood = (self.class_and_word_to_counts[c] + 1) \
+                         / (np.sum(self.class_and_word_to_counts[c]) + self.num_vocab)
+            likelihood_list.append(likelihood)
+        return np.asarray(likelihood_list)
 
     def predict(self, bows):
         """Predict labels (0 or 1) by posterior, p(c_k|w_1, ..., w_n) ~ p(c_k) \prod_{i=1}^{n} p(w_i|c_k)
@@ -172,7 +181,11 @@ class MyNaiveBayes:
         :return ndarray L, the shape of which is (num_batches,)
             where L[i] is the label of the ith sample.
         """
-        raise NotImplementedError
+        labels = []
+        for bow in tqdm(bows):
+            log_posterior = self.log_prior + np.sum(self.log_likelihood * bow, axis=1)
+            labels.append(np.argmax(log_posterior))
+        return np.asarray(labels)
 
     def _check(self):
         """Do not modify the code in this function."""
