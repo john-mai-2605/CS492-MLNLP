@@ -158,12 +158,13 @@ class SkipGram:
         :param W: [vocab_dim, embedding_dim] (np.ndarray)  : W matrix
         :param W_prime: [vocab_dim, embedding_dim] (np.ndarray) : W_prime matrix
         :return: (float)
-
         You may wonder what this function should output.
         This function should return the input to the sigmoid function.
         """
-        raise NotImplementedError
 
+        result=np.dot(W_prime[index2],W[index1])
+        return result
+        
     def backward(self, forwards, label):
         """
         Calculate gradients from a Negative Sampling objective function!
@@ -171,7 +172,6 @@ class SkipGram:
         :param forwards: (float) : the result from the forward
         :param label: (int) : whether the word is positive (1) or negative (0).
         :return: (float) : gradient
-
         If you finish the derivation of 3 equations in Exercise 1-1, you will find a pattern
         or a similarity among them. You can get a result in a form of [scalar]x[vector].
         You should return only scalar term without vector term.
@@ -182,7 +182,7 @@ class SkipGram:
         elif forwards < - bound:
             gradient = (label - 0)
         else:
-            raise NotImplementedError
+            gradient = (label-sigmoid(forwards))
         return gradient
 
     def optimize(self, learning_rate, gradients, W, W_prime):
@@ -193,21 +193,21 @@ class SkipGram:
         :param gradients: (list) : list of (gradient (float), center index (int), context index (int)) triples
         :param W: [vocab_dim, embedding_dim] (np.ndarray) : W matrix
         :param W_prime: [vocab_dim, embedding_dim] (np.ndarray) : W_prime matrix
-
         In a backward function, we only return a scalar term, but the original gradient form is [scalar]x[vector].
         You should update weights by adding or subtracting learning_rate * gradient value.
         There's no return value.
         """
         W_prime_original = deepcopy(W_prime)
-
+        
+        
         # Update W_prime with W and grad.
         for grad, center_i, context_i in gradients:
-            raise NotImplementedError
+          W_prime[context_i]+=learning_rate*grad*W[center_i]
 
         # Update W with W_prime_original and grad.
         for grad, center_i, context_i in gradients:
-            raise NotImplementedError
-
+          W[center_i]+=learning_rate*grad*W_prime_original[context_i]
+          
     def subsampling(self, sample_bound, sentence):
         """
         Implement subsampling!
@@ -217,7 +217,6 @@ class SkipGram:
         :param sentence: (string)
         :return sampled_word_indices
         - sampled_word_indices: (List[int]) : indices of subsampled words
-
         You should split a sentence into a list of words.
         You have to utilize self.vocab when you calculate the frequency (f) of each word. Please see Vocabulary class.
         Second argument, sample_bound, specifies threshold (t) represented in Exercise 1-2.
@@ -228,7 +227,12 @@ class SkipGram:
             if self.vocab.word2count.get(word) is None:
                 continue
             else:
-                raise NotImplementedError
+                f = self.vocab.word2count[word]/self.vocab.total_words
+                p = (f-sample_bound)/f-np.sqrt(sample_bound/f)
+                X = np.random.random()
+                sampled_word_indices.append(self.vocab.word2index[word])
+                if (X>1-p):
+                  sampled_word_indices.remove(self.vocab.word2index[word])
         return sampled_word_indices
 
     def train(self, input_file_name, output_file_name,
