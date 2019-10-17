@@ -114,6 +114,7 @@ Model perplexity: 45.623
 If you don't implement the code but just try to mimic answers above. You will get zero for this task.
 
 ## Q&A
+```Python
 1. What is the N in the perplexity?
 
 The perplexity of a language model on a test set is the inverse probability of the test set, normalized by the number of words.
@@ -169,3 +170,4 @@ I do not recommend this method to you. You can try other methods when you genera
 
 
 3. You have to return (EOS, 1) when "len(candidates) == 0" case happens
+```
