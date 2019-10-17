@@ -114,60 +114,59 @@ Model perplexity: 45.623
 If you don't implement the code but just try to mimic answers above. You will get zero for this task.
 
 ## Q&A
-```Python
-1. What is the N in the perplexity?
 
-The perplexity of a language model on a test set is the inverse probability of the test set, normalized by the number of words.
+>1. What is the N in the perplexity?
 
-Adding all of the minus log probabilities of n-gram and exponentiating them is a kind of calculating inverse joint probability on a test set.
+>The perplexity of a language model on a test set is the inverse probability of the test set, normalized by the number of >words.
 
-Some students asked me whether N is the number of words in a test set or the number of n-grams in a test set.
+>Adding all of the minus log probabilities of n-gram and exponentiating them is a kind of calculating inverse joint >probability on a test set.
 
-My answer is the number of words in a test set.
+>Some students asked me whether N is the number of words in a test set or the number of n-grams in a test set.
 
-
-
-2. Question about hint #5 in _best_candidate function.
-
- "You also have to consider the case when prev ==  () or prev[-1] == "<s>""
-
-[1]  Case "prev == ()"
-
-If you see the code on generate_sentences function. There's a line "prev = () if self.n == 1 else tuple(sent[-(self.n - 1):])".
-
-You can identify that when we generate a sentence with a unigram model "prev = ()" case happens.
+>My answer is the number of words in a test set.
 
 
 
- [2] Case "prev[-1] == "<s>"
+>2. Question about hint #5 in _best_candidate function.
 
-This is a case of generating the first word in a sentence.
+> "You also have to consider the case when prev ==  () or prev[-1] == "<s>""
 
-Let's consider a trigram model.
+>[1]  Case "prev == ()"
 
-Suppose there is a training sentence like "<s> <s> I am a student </s> </s>".
+>If you see the code on generate_sentences function. There's a line "prev = () if self.n == 1 else tuple(sent[-(self.n - 1):])".
 
-After training the model, we want to generate a new sentence with the trigram model.
-
-trigram -> ("1st word", "2nd word", 3rd word")
-
-prev -> ("1st word", "2nd word")
-
-There's only a one case when prev[-1] == "<s>" happens. -> Generating the first word in a sentence
-
- (Note that prev[-1] == "2nd word")
+>You can identify that when we generate a sentence with a unigram model "prev = ()" case happens.
 
 
 
-From these 2 cases, you may wonder why do we return i-th elements in a candidate list.
+>[2] Case "prev[-1] == "<s>"
 
-We can just generate a random word from a candidate list.
+>This is a case of generating the first word in a sentence.
 
-My answer is just for my convenience of evaluating your code.
+>Let's consider a trigram model.
 
-I do not recommend this method to you. You can try other methods when you generate a sentence with unigram model or when you generate the first word of a sentence. 
+>Suppose there is a training sentence like "<s> <s> I am a student </s> </s>".
+
+>After training the model, we want to generate a new sentence with the trigram >model.
+
+>trigram -> ("1st word", "2nd word", 3rd word")
+
+>prev -> ("1st word", "2nd word")
+
+>There's only a one case when prev[-1] == "<s>" happens. -> Generating the first word in a sentence
+
+> (Note that prev[-1] == "2nd word")
 
 
 
-3. You have to return (EOS, 1) when "len(candidates) == 0" case happens
-```
+>From these 2 cases, you may wonder why do we return i-th elements in a candidate list.
+
+>We can just generate a random word from a candidate list.
+
+>My answer is just for my convenience of evaluating your code.
+
+>I do not recommend this method to you. You can try other methods when you generate a sentence with unigram model or when you generate the first word of a sentence. 
+
+
+
+>3. You have to return (EOS, 1) when "len(candidates) == 0" case happens
