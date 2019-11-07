@@ -361,11 +361,11 @@ def build_model(learning_rate,
     # Concatenate outputs by using a tf.concat function.
     raise NotImplementedError
 
-    # Use only last output, [num_batches, max_len, num_hidden] -> [num_batches, num_hidden]
+    # Use only last output, [num_batches, max_len, 2*num_hidden] -> [num_batches, 2*num_hidden]
     outputs = tf.transpose(outputs, [1, 0, 2])[-1]
 
     # Build a fully-connected layer.
-    # [num_batches, num_embed] -> [num_batches, num_classes]
+    # [num_batches, 2*num_hidden] -> [num_batches, num_classes]
     weight = tf.Variable(tf.random_normal([num_hidden * 2, num_classes]))
     bias = tf.Variable(tf.random_normal([num_classes]))
     logits = tf.matmul(outputs, weight) + bias
